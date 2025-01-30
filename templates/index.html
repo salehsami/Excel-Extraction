@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SQL Query Generator</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      input,
+      button {
+        margin: 5px;
+        padding: 8px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      textarea#question {
+        width: 99%;
+        font-size: 18px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        resize: vertical;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Excel Data Extractor</h2>
+    <textarea id="question" placeholder="Ask a question" rows="3"></textarea>
+    <button onclick="askQuestion()">Submit</button>
+
+    <h3>Generated SQL Query:</h3>
+    <p id="sqlQuery"></p>
+
+    <h3>Results:</h3>
+    <table id="resultsTable">
+      <thead>
+        <tr id="tableHead"></tr>
+        <!-- Dynamically filled -->
+      </thead>
+      <tbody id="tableBody"></tbody>
+      <!-- Dynamically filled -->
+    </table>
+
+    <script>
+      function askQuestion() {
+        let question = document.getElementById("question").value;
+        if (!question.trim()) {
+          alert("Please enter a question.");
+          return;
+        }
+
+        fetch("/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question: question }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.error) {
+              document.getElementById("sqlQuery").innerText =
+                "Error: " + data.error;
+              document.getElementById("tableHead").innerHTML = "";
+              document.getElementById("tableBody").innerHTML = "";
+            } else {
+              document.getElementById("sqlQuery").innerText = data.sql_query;
+
+              // Populate table
+              let columns = data.columns;
+              let results = data.results;
+
+              if (columns.length > 0) {
+                // Table Headings
+                let theadHTML = columns
+                  .map((column) => `<th>${column}</th>`)
+                  .join("");
+                document.getElementById(
+                  "tableHead"
+                ).innerHTML = `<tr>${theadHTML}</tr>`;
+
+                // Table Body
+                let tbodyHTML = results
+                  .map(
+                    (row) =>
+                      `<tr>${columns
+                        .map((column) => `<td>${row[column]}</td>`)
+                        .join("")}</tr>`
+                  )
+                  .join("");
+                document.getElementById("tableBody").innerHTML = tbodyHTML;
+              } else {
+                document.getElementById("tableHead").innerHTML =
+                  "<th>No Results</th>";
+                document.getElementById("tableBody").innerHTML = "";
+              }
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            document.getElementById("sqlQuery").innerText =
+              "An error occurred. Please try again.";
+          });
+      }
+    </script>
+  </body>
+</html>

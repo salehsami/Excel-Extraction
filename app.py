@@ -7,7 +7,7 @@ from flask_cors import CORS  # Enable frontend-backend communication
 
 
 # Set up OpenAI API key
-openai.api_key = ' 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'  # Ensure API key is set via environment variable
+openai.api_key = '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'  # Ensure API key is set via environment variable
 
 # openai.api_key = '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'
 # Set up Flask app

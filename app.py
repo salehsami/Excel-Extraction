@@ -4,6 +4,7 @@ import openai
 import os
 import logging
 from flask_cors import CORS  # Enable frontend-backend communication
+from serverless_wsgi import handle_request
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -119,3 +120,4 @@ def index():
 # Run the Flask app
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+handler = handle_request(app)

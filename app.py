@@ -4,20 +4,20 @@ import openai
 import os
 import logging
 from flask_cors import CORS  # Enable frontend-backend communication
-from serverless_wsgi import handle_request
 
-logging.basicConfig(level=logging.DEBUG)
 
 # Set up OpenAI API key
 openai.api_key = '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'  # Ensure API key is set via environment variable
 
 # openai.api_key = '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'
 # Set up Flask app
-app = Flask(__name__)
-CORS(app)  # Allow frontend access
+app = Flask(__name__, static_folder='static', template_folder='templates')
+CORS(app)
 
 # Path to the SQLite database
-db_path = 'podcasts.db'
+db_path = os.path.join(os.path.dirname(__file__), 'podcasts.db')
+
+application = app  # ← This is critical for Vercel
 
 print("hello from top")
 
@@ -117,6 +117,10 @@ def ask():
 def index():
     return render_template('index.html')
 
+@app.route('/test')
+def test():
+    return "Vercel deployment works!"
+    
 # Run the Flask app
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
